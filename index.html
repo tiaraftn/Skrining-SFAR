@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Peduli Rinitis Alergi</title>
+    <style>
+        :root {
+            --primary-color: #008080; /* Teal */
+            --primary-dark: #006666;
+            --secondary-color: #e0f2f1;
+            --background: #f4f9f9;
+            --text-color: #333;
+            --danger-color: #d32f2f;
+            --success-color: #388e3c;
+            --blue-color: #1976d2;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 50px;
+        }
+
+        /* Navigation Bar */
+        nav {
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 10px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav .nav-item {
+            padding: 10px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+            border-radius: 20px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        nav .nav-item:hover, nav .nav-item.active {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        /* Page Controller */
+        .page { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .page.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2, h3 { color: var(--primary-color); margin-top: 0; }
+        h1 { text-align: center; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #666; font-size: 0.95em; margin-bottom: 30px; }
+
+        /* Forms & Inputs */
+        .form-group { margin-bottom: 15px; }
+        label.form-label { display: block; font-weight: bold; margin-bottom: 5px; color: #004d40; }
+        input[type="text"], input[type="number"], input[type="time"], select {
+            width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-family: inherit;
+        }
+        
+        .question-block {
+            background: var(--secondary-color); padding: 15px 20px; border-radius: 8px; margin-bottom: 15px;
+        }
+        .question-block p { font-weight: bold; margin-top: 0; margin-bottom: 10px; color: #004d40; }
+        .radio-label { display: block; margin-bottom: 8px; cursor: pointer; }
+        .radio-label input[type="radio"] { margin-right: 10px; transform: scale(1.2); }
+
+        /* Buttons */
+        button {
+            background-color: var(--primary-color); color: white; padding: 14px 20px; font-size: 1em; font-weight: bold;
+            border: none; border-radius: 8px; cursor: pointer; width: 100%; transition: background-color 0.3s; margin-top: 10px;
+        }
+        button:hover { background-color: var(--primary-dark); }
+        .btn-secondary { background-color: #757575; }
+        .btn-secondary:hover { background-color: #616161; }
+
+        /* Result Area */
+        #pdf-content { padding: 20px; border-radius: 8px; text-align: center; background-color: white; border: 2px solid transparent;}
+        .score-display { font-size: 2.5em; font-weight: bold; margin: 10px 0; }
+        .result-high { background-color: #ffdde0; border-color: #ffcdd2; color: #b71c1c; }
+        .result-low { background-color: #e8f5e9; border-color: #c8e6c9; color: #1b5e20; }
+        
+        .advice-list { text-align: left; margin-top: 15px; background: #f9f9f9; padding: 15px; border-radius: 6px; }
+        .user-info-result { text-align: left; margin-bottom: 20px; border-bottom: 2px solid #ccc; padding-bottom: 15px; }
+
+        /* Content Formatting */
+        .content-box ul { padding-left: 20px; }
+        .content-box li { margin-bottom: 8px; }
+        
+        /* Hospital List */
+        .hospital-card {
+            border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+        }
+        .hospital-info h4 { margin: 0 0 5px 0; color: #333; }
+        .hospital-info p { margin: 0; font-size: 0.9em; color: #666; }
+        .btn-map { width: auto; background-color: #4CAF50; padding: 8px 15px; font-size: 0.9em; }
+        .btn-map:hover { background-color: #388E3C; }
+
+        /* Reminder List */
+        .reminder-item {
+            background: #fff3e0; border-left: 5px solid #ff9800; padding: 15px; margin-bottom: 10px; border-radius: 4px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn-delete-reminder { background-color: var(--danger-color); width: auto; padding: 6px 12px; font-size: 0.8em; margin-top: 0;}
+        .btn-delete-reminder:hover { background-color: #b71c1c;}
+
+        /* Custom Modal */
+        #custom-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: fadeIn 0.3s;
+        }
+        .modal-content h3 { color: var(--primary-color); margin-top: 0;}
+        
+        /* Utility */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Navigasi -->
+    <nav>
+        <div class="nav-item active" onclick="switchPage('page-skrining', this)">📝 Skrining SFAR</div>
+        <div class="nav-item" onclick="switchPage('page-edukasi', this)">📚 Edukasi Rinitis</div>
+        <div class="nav-item" onclick="switchPage('page-reminder', this)">⏰ Pengingat Obat</div>
+        <div class="nav-item" onclick="switchPage('page-rs', this)">🏥 Direktori RS</div>
+    </nav>
+
+    <!-- Modal Custom untuk menggantikan Alert -->
+    <div id="custom-modal">
+        <div class="modal-content">
+            <h3 id="modal-title">Pesan</h3>
+            <p id="modal-message">Isi pesan disini.</p>
+            <button onclick="closeModal()">Tutup</button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- HALAMAN 1: SKRINING & IDENTITAS -->
+        <section id="page-skrining" class="page active">
+            
+            <!-- Tahap 1: Identitas -->
+            <div id="section-identitas" class="card">
+                <h1>Data Diri</h1>
+                <p class="subtitle">Lengkapi identitas Anda sebelum memulai skrining</p>
+                <form id="form-identitas">
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap</label>
+                        <input type="text" id="user-name" required placeholder="Masukkan nama Anda">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Usia (Tahun)</label>
+                        <input type="number" id="user-age" required min="1" placeholder="Contoh: 25">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Jenis Kelamin</label>
+                        <select id="user-gender" required>
+                            <option value="">-- Pilih Jenis Kelamin --</option>
+                            <option value="Laki-laki">Laki-laki</option>
+                            <option value="Perempuan">Perempuan</option>
+                        </select>
+                    </div>
+                    <button type="button" onclick="mulaiSkrining()">Lanjut ke Kuisioner</button>
+                </form>
+            </div>
+
+            <!-- Tahap 2: Kuisioner SFAR -->
+            <div id="section-kuisioner" class="card hidden">
+                <h1>Kalkulator SFAR</h1>
+                <p class="subtitle">Skrining Mandiri Probabilitas Rinitis Alergi</p>
+                <form id="sfarForm">
+                    <div class="question-block">
+                        <p>1. Hidung tersumbat: Apakah Anda sering mengalami hidung tersumbat di luar kondisi flu atau infeksi saluran napas?</p>
+                        <label class="radio-label"><input type="radio" name="q1" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q1" value="0"> Tidak</label>
+                    </div>
+                    
+                    <div class="question-block">
+                        <p>2. Hidung berair (rhinorrhea): Apakah Anda sering mengalami hidung meler atau keluar cairan bening tanpa sedang flu?</p>
+                        <label class="radio-label"><input type="radio" name="q2" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q2" value="0"> Tidak</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>3. Bersin berulang: Apakah Anda sering mengalami bersin-bersin berulang terutama pada pagi hari atau saat terpapar udara dingin/debu?</p>
+                        <label class="radio-label"><input type="radio" name="q3" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q3" value="0"> Tidak</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>4. Batuk kronis / iritasi tenggorokan: Apakah Anda sering mengalami batuk kering atau rasa gatal di tenggorokan yang berlangsung lama tanpa penyebab infeksi jelas?</p>
+                        <label class="radio-label"><input type="radio" name="q4" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q4" value="0"> Tidak</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>5. Pola waktu gejala: Apakah keluhan hidung Anda terjadi:</p>
+                        <label class="radio-label"><input type="radio" name="q5" value="1" required> Sepanjang tahun (perennial)</label>
+                        <label class="radio-label"><input type="radio" name="q5" value="1"> Pada musim atau waktu tertentu saja (seasonal)</label>
+                        <label class="radio-label"><input type="radio" name="q5" value="0"> Tidak keduanya</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>6. Gejala mata alergi: Apakah keluhan hidung Anda sering disertai dengan mata gatal, merah, atau berair?</p>
+                        <label class="radio-label"><input type="radio" name="q6" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q6" value="0"> Tidak</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>7. Pemicu debu rumah: Apakah gejala hidung Anda muncul atau bertambah parah saat terpapar debu rumah, tungau, atau saat membersihkan rumah?</p>
+                        <label class="radio-label"><input type="radio" name="q7" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q7" value="0"> Tidak</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>8. Pemicu serbuk sari / lingkungan luar: Apakah gejala hidung Anda muncul atau memburuk saat berada di luar ruangan, taman, atau saat terpapar tanaman/serbuk sari?</p>
+                        <label class="radio-label"><input type="radio" name="q8" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q8" value="0"> Tidak</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>9. Persepsi alergi pribadi: Apakah Anda merasa bahwa keluhan hidung yang Anda alami disebabkan oleh alergi?</p>
+                        <label class="radio-label"><input type="radio" name="q9" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q9" value="0"> Tidak</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>10. Diagnosis medis sebelumnya: Apakah Anda pernah didiagnosis oleh dokter menderita rhinitis alergi atau alergi pernapasan?</p>
+                        <label class="radio-label"><input type="radio" name="q10" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q10" value="0"> Tidak</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>11. Riwayat tes alergi: Apakah Anda pernah menjalani tes alergi (skin prick test / tes darah IgE) dan hasilnya positif?</p>
+                        <label class="radio-label"><input type="radio" name="q11" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q11" value="0"> Tidak</label>
+                    </div>
+
+                    <div class="question-block">
+                        <p>12. Riwayat alergi dalam keluarga: Apakah orang tua atau saudara kandung Anda memiliki riwayat alergi, seperti Rhinitis alergi, Asma, atau Eksim / dermatitis atopik?</p>
+                        <label class="radio-label"><input type="radio" name="q12" value="1" required> Ya</label>
+                        <label class="radio-label"><input type="radio" name="q12" value="0"> Tidak</label>
+                    </div>
+
+                    <button type="button" onclick="calculateSFAR()">Hitung Skor Rinitis Alergi</button>
+                    <button type="button" class="btn-secondary" onclick="kembaliKeIdentitas()">Kembali</button>
+                </form>
+            </div>
+
+            <!-- Tahap 3: Hasil -->
+            <div id="section-hasil" class="hidden">
+                <div id="pdf-content">
+                    <h2>Hasil Skrining SFAR</h2>
+                    
+                    <div class="user-info-result">
+                        <strong>Identitas Pengguna:</strong><br>
+                        Nama: <span id="res-name"></span><br>
+                        Usia: <span id="res-age"></span> Tahun<br>
+                        Jenis Kelamin: <span id="res-gender"></span>
+                    </div>
+
+                    <p>Total Skor SFAR Anda:</p>
+                    <div class="score-display" id="res-score">0</div>
+                    <p id="res-category" style="font-size: 1.2em; font-weight: bold;"></p>
+                    
+                    <div class="advice-list" id="res-advice"></div>
+                    <p style="font-size: 0.8em; color: #666; margin-top: 20px;">*Dokumen ini merupakan hasil skrining mandiri berdasarkan "Score for Allergic Rhinitis" dan tidak menggantikan diagnosis resmi dari dokter.</p>
+                </div>
+                
+                <button type="button" class="btn-secondary" onclick="resetSkrining()">Ulangi Skrining</button>
+            </div>
+        </section>
+
+        <!-- HALAMAN 2: EDUKASI -->
+        <section id="page-edukasi" class="page">
+            <div class="card content-box">
+                <h2>Apa itu Rinitis Alergi?</h2>
+                <p><strong>Rinitis alergi</strong> adalah peradangan pada lapisan bagian dalam hidung yang terjadi akibat reaksi alergi. Kondisi ini muncul ketika sistem kekebalan tubuh bereaksi berlebihan terhadap zat yang sebenarnya tidak berbahaya bagi kebanyakan orang (alergen).</p>
+                <p>Gejala umum meliputi:</p>
+                <ul>
+                    <li>Bersin-bersin berkali-kali, terutama di pagi hari.</li>
+                    <li>Hidung meler (ingus encer dan bening) atau hidung tersumbat.</li>
+                    <li>Hidung, langit-langit mulut, dan tenggorokan terasa gatal.</li>
+                    <li>Mata berair, merah, dan gatal (konjungtivitis alergi).</li>
+                </ul>
+                <p>Meski sering disebut "hay fever", rinitis alergi tidak menyebabkan demam. Kondisi ini dapat bersifat musiman (karena serbuk sari) atau sepanjang tahun (karena debu, tungau, atau hewan peliharaan).</p>
+            </div>
+
+            <div class="card content-box">
+                <h2>Faktor Risiko Rinitis Alergi</h2>
+                <p>Beberapa hal yang dapat meningkatkan kemungkinan seseorang mengalami rinitis alergi antara lain:</p>
+                <ul>
+                    <li><strong>Genetik / Keturunan:</strong> Risiko Anda jauh lebih tinggi jika salah satu atau kedua orang tua memiliki riwayat alergi atau asma.</li>
+                    <li><strong>Memiliki Kondisi Alergi Lain:</strong> Seperti asma atau eksim (dermatitis atopik).</li>
+                    <li><strong>Lingkungan:</strong> Paparan terus-menerus terhadap alergen seperti tungau debu rumah (TDR), bulu hewan peliharaan, kecoa, atau jamur di lingkungan tempat tinggal.</li>
+                    <li><strong>Paparan Asap Rokok:</strong> Terutama pada usia dini (bayi/anak-anak), dapat meningkatkan kepekaan saluran napas.</li>
+                    <li><strong>Polusi Udara:</strong> Tinggal di daerah dengan tingkat polusi dan debu jalanan yang tinggi dapat memicu atau memperburuk gejala.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- HALAMAN 3: PENGINGAT OBAT -->
+        <section id="page-reminder" class="page">
+            <div class="card">
+                <h2>Atur Pengingat Minum Obat</h2>
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">Tambahkan jadwal obat alergi Anda (misal: Cetirizine, Loratadine, atau obat semprot hidung). Sistem akan mengingatkan Anda saat waktunya tiba.</p>
+                
+                <form id="form-reminder">
+                    <div class="form-group">
+                        <label class="form-label">Nama Obat</label>
+                        <input type="text" id="rem-name" required placeholder="Contoh: Cetirizine 10mg">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Waktu Minum</label>
+                        <input type="time" id="rem-time" required>
+                    </div>
+                    <button type="button" onclick="tambahReminder()">Tambahkan Pengingat</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Daftar Pengingat Aktif</h3>
+                <div id="reminder-list">
+                    <p style="color: #999; text-align: center; font-style: italic;">Belum ada pengingat yang ditambahkan.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- HALAMAN 4: DIREKTORI RS -->
+        <section id="page-rs" class="page">
+            <div class="card">
+                <h2>Rumah Sakit di Bandar Lampung</h2>
+                <p style="color: #666; font-size: 0.9em; margin-bottom: 20px;">Daftar rumah sakit dengan fasilitas poli THT-KL untuk konsultasi rinitis alergi lebih lanjut.</p>
+
+                <!-- List RS -->
+                <div class="hospital-card">
+                    <div class="hospital-info">
+                        <h4>RSUD Dr. H. Abdul Moeloek</h4>
+                        <p>Jl. Dr. Rivai No.6, Penengahan, Bandar Lampung</p>
+                    </div>
+                    <button class="btn-map" onclick="bukaGmaps('RSUD Dr. H. Abdul Moeloek Bandar Lampung')">Buka Map</button>
+                </div>
+
+                <div class="hospital-card">
+                    <div class="hospital-info">
+                        <h4>RS Urip Sumoharjo</h4>
+                        <p>Jl. Urip Sumoharjo No.200, Way Halim, Bandar Lampung</p>
+                    </div>
+                    <button class="btn-map" onclick="bukaGmaps('RS Urip Sumoharjo Bandar Lampung')">Buka Map</button>
+                </div>
+
+                <div class="hospital-card">
+                    <div class="hospital-info">
+                        <h4>RS Imanuel Way Halim</h4>
+                        <p>Jl. Soekarno Hatta, Way Halim, Bandar Lampung</p>
+                    </div>
+                    <button class="btn-map" onclick="bukaGmaps('RS Imanuel Way Halim Bandar Lampung')">Buka Map</button>
+                </div>
+
+                <div class="hospital-card">
+                    <div class="hospital-info">
+                        <h4>RS Bumi Waras</h4>
+                        <p>Jl. Wolter Monginsidi No.235, Tanjung Karang, Bandar Lampung</p>
+                    </div>
+                    <button class="btn-map" onclick="bukaGmaps('RS Bumi Waras Bandar Lampung')">Buka Map</button>
+                </div>
+
+                <div class="hospital-card">
+                    <div class="hospital-info">
+                        <h4>RS Advent Bandar Lampung</h4>
+                        <p>Jl. Teuku Umar No.48, Kedaton, Bandar Lampung</p>
+                    </div>
+                    <button class="btn-map" onclick="bukaGmaps('RS Advent Bandar Lampung')">Buka Map</button>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+<script>
+    // --- NAVIGASI ---
+    function switchPage(pageId, navElement) {
+        // Sembunyikan semua halaman
+        document.querySelectorAll('.page').forEach(page => {
+            page.classList.remove('active');
+        });
+        // Tampilkan halaman yang dipilih
+        document.getElementById(pageId).classList.add('active');
+        
+        // Update status active di navigasi
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        navElement.classList.add('active');
+    }
+
+    // --- MODAL CUSTOM (Pengganti Alert) ---
+    function showModal(title, message) {
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-message').innerText = message;
+        document.getElementById('custom-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('custom-modal').style.display = 'none';
+    }
+
+    // --- LOGIKA SKRINING & IDENTITAS ---
+    let userData = { name: '', age: '', gender: '' };
+
+    function mulaiSkrining() {
+        const name = document.getElementById('user-name').value.trim();
+        const age = document.getElementById('user-age').value.trim();
+        const gender = document.getElementById('user-gender').value;
+
+        if (!name || !age || !gender) {
+            showModal('Peringatan', 'Mohon lengkapi semua data identitas terlebih dahulu.');
+            return;
+        }
+
+        userData = { name, age, gender };
+        
+        // Pindah ke tampilan kuisioner
+        document.getElementById('section-identitas').classList.add('hidden');
+        document.getElementById('section-kuisioner').classList.remove('hidden');
+    }
+
+    function kembaliKeIdentitas() {
+        document.getElementById('section-kuisioner').classList.add('hidden');
+        document.getElementById('section-identitas').classList.remove('hidden');
+    }
+
+    function calculateSFAR() {
+        const form = document.getElementById('sfarForm');
+        
+        // Validasi input radio
+        const q1 = document.querySelector('input[name="q1"]:checked');
+        const q2 = document.querySelector('input[name="q2"]:checked');
+        const q3 = document.querySelector('input[name="q3"]:checked');
+        const q4 = document.querySelector('input[name="q4"]:checked');
+        const q5 = document.querySelector('input[name="q5"]:checked');
+        const q6 = document.querySelector('input[name="q6"]:checked');
+        const q7 = document.querySelector('input[name="q7"]:checked');
+        const q8 = document.querySelector('input[name="q8"]:checked');
+        const q9 = document.querySelector('input[name="q9"]:checked');
+        const q10 = document.querySelector('input[name="q10"]:checked');
+        const q11 = document.querySelector('input[name="q11"]:checked');
+        const q12 = document.querySelector('input[name="q12"]:checked');
+
+        if (!q1 || !q2 || !q3 || !q4 || !q5 || !q6 || !q7 || !q8 || !q9 || !q10 || !q11 || !q12) {
+            showModal("Perhatian", "Mohon jawab semua pertanyaan pada kuisioner.");
+            return;
+        }
+
+        const totalScore = parseInt(q1.value) + parseInt(q2.value) + parseInt(q3.value) + parseInt(q4.value) + 
+                           parseInt(q5.value) + parseInt(q6.value) + parseInt(q7.value) + parseInt(q8.value) + 
+                           parseInt(q9.value) + parseInt(q10.value) + parseInt(q11.value) + parseInt(q12.value);
+
+        // Isi data ke template hasil
+        document.getElementById('res-name').innerText = userData.name;
+        document.getElementById('res-age').innerText = userData.age;
+        document.getElementById('res-gender').innerText = userData.gender;
+        
+        const resScore = document.getElementById('res-score');
+        const resCategory = document.getElementById('res-category');
+        const resAdvice = document.getElementById('res-advice');
+        const pdfContent = document.getElementById('pdf-content');
+
+        resScore.textContent = totalScore;
+        
+        // Reset class
+        pdfContent.className = '';
+
+        if (totalScore >= 7) {
+            pdfContent.classList.add('result-high');
+            resCategory.textContent = "Probabilitas Tinggi Rinitis Alergi";
+            resAdvice.innerHTML = `
+                <strong>Saran Modifikasi Gaya Hidup:</strong>
+                <ul>
+                    <li><strong>Hindari Alergen (Avoidance):</strong> Bersihkan kamar dari debu secara rutin, ganti sprei seminggu sekali, dan hindari paparan bulu hewan di area tidur.</li>
+                    <li><strong>Gunakan Masker:</strong> Saat sedang bersih-bersih rumah, menyapu, atau berada di lingkungan luar yang berdebu.</li>
+                    <li><strong>Konsultasi Medis:</strong> Disarankan untuk berkonsultasi dengan dokter THT atau dokter umum untuk mendapatkan tata laksana medis (obat-obatan) yang tepat.</li>
+                </ul>
+            `;
+        } else {
+            pdfContent.classList.add('result-low');
+            resCategory.textContent = "Probabilitas Rendah Rinitis Alergi";
+            resAdvice.innerHTML = `
+                <strong>Saran Kesehatan:</strong>
+                <ul>
+                    <li>Gejala hidung yang Anda alami kemungkinan bukan disebabkan oleh rinitis alergi (mungkin infeksi virus flu biasa atau penyebab lain).</li>
+                    <li>Jaga daya tahan tubuh dengan istirahat cukup, makan makanan bergizi, dan hidrasi yang baik.</li>
+                    <li>Jika keluhan sangat mengganggu atau berlanjut lebih dari 7-10 hari tanpa perbaikan, segera periksakan diri ke dokter.</li>
+                </ul>
+            `;
+        }
+
+        // Tampilkan hasil
+        document.getElementById('section-kuisioner').classList.add('hidden');
+        document.getElementById('section-hasil').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function resetSkrining() {
+        // Reset Forms
+        document.getElementById('form-identitas').reset();
+        document.getElementById('sfarForm').reset();
+        
+        // Kembali ke tampilan awal
+        document.getElementById('section-hasil').classList.add('hidden');
+        document.getElementById('section-identitas').classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // --- LOGIKA PENGINGAT OBAT ---
+    let reminders = [];
+
+    function tambahReminder() {
+        const name = document.getElementById('rem-name').value.trim();
+        const time = document.getElementById('rem-time').value;
+
+        if (!name || !time) {
+            showModal("Informasi Kurang", "Mohon isi nama obat dan waktu pengingat.");
+            return;
+        }
+
+        reminders.push({ id: Date.now(), name: name, time: time, lastTriggered: '' });
+        document.getElementById('rem-name').value = '';
+        document.getElementById('rem-time').value = '';
+        
+        renderReminders();
+        showModal("Berhasil", `Pengingat untuk obat ${name} pada pukul ${time} berhasil ditambahkan!`);
+    }
+
+    function hapusReminder(id) {
+        reminders = reminders.filter(r => r.id !== id);
+        renderReminders();
+    }
+
+    function renderReminders() {
+        const listDiv = document.getElementById('reminder-list');
+        listDiv.innerHTML = '';
+
+        if (reminders.length === 0) {
+            listDiv.innerHTML = '<p style="color: #999; text-align: center; font-style: italic;">Belum ada pengingat yang ditambahkan.</p>';
+            return;
+        }
+
+        reminders.sort((a,b) => a.time.localeCompare(b.time)).forEach(r => {
+            const item = document.createElement('div');
+            item.className = 'reminder-item';
+            item.innerHTML = `
+                <div>
+                    <strong>${r.time}</strong> - ${r.name}
+                </div>
+                <button class="btn-delete-reminder" onclick="hapusReminder(${r.id})">Hapus</button>
+            `;
+            listDiv.appendChild(item);
+        });
+    }
+
+    // Pengecekan Waktu untuk Alarm Obat (Berjalan setiap 10 detik)
+    setInterval(() => {
+        if (reminders.length === 0) return;
+
+        const now = new Date();
+        // Format jam:menit agar sesuai dengan input type="time"
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const currentTime = `${hours}:${minutes}`;
+        const todayDate = now.toDateString();
+
+        reminders.forEach(r => {
+            // Jika jam dan menit sama, dan belum ditrigger hari ini
+            if (r.time === currentTime && r.lastTriggered !== todayDate) {
+                showModal("⏰ Waktunya Minum Obat!", `Halo, ini waktunya Anda untuk meminum obat: \n\n${r.name}\n\nSemoga lekas membaik!`);
+                r.lastTriggered = todayDate; // Tandai sudah diberi notif hari ini
+            }
+        });
+    }, 10000);
+
+    // --- LOGIKA BUKA MAPS ---
+    function bukaGmaps(query) {
+        // Encode URL untuk query pencarian rumah sakit
+        const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+        window.open(url, '_blank');
+    }
+
+</script>
+
+</body>
+</html>
